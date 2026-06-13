@@ -13,6 +13,7 @@ export default function AppealsPage() {
   const [appeals, setAppeals] = useState([]);
   const [notice, setNotice] = useState(null);
   const [responses, setResponses] = useState({});
+  const [newScores, setNewScores] = useState({});
 
   const loadAppeals = async () => {
     setAppeals(await api.listAppeals());
@@ -26,16 +27,34 @@ export default function AppealsPage() {
     setResponses((current) => ({ ...current, [appealId]: value }));
   };
 
+  const updateNewScore = (appealId, value) => {
+    setNewScores((current) => ({ ...current, [appealId]: value }));
+  };
+
   const decide = async (appeal, status) => {
     const teacherResponse = responses[appeal.id] || "";
     if (!teacherResponse.trim()) {
       setNotice({ type: "error", message: "请填写处理意见" });
       return;
     }
+    const payload = { status, teacherResponse: teacherResponse.trim() };
+    if (status === "approved") {
+      const score = newScores[appeal.id];
+      if (!score || isNaN(Number(score))) {
+        setNotice({ type: "error", message: "申诉通过时必须填写更正后的成绩" });
+        return;
+      }
+      payload.newScore = Number(score);
+    }
     try {
-      await api.updateAppeal(appeal.id, { status, teacherResponse: teacherResponse.trim() });
-      setNotice({ type: "success", message: "申诉状态已更新" });
+      await api.updateAppeal(appeal.id, payload);
+      setNotice({ type: "success", message: status === "approved" ? "申诉已通过，成绩已更正" : "申诉已驳回" });
       setResponses((current) => {
+        const next = { ...current };
+        delete next[appeal.id];
+        return next;
+      });
+      setNewScores((current) => {
         const next = { ...current };
         delete next[appeal.id];
         return next;
@@ -65,6 +84,9 @@ export default function AppealsPage() {
               </div>
               <p>
                 {appeal.studentName}（{appeal.studentNo}）当前成绩 {appeal.score} 分
+                {appeal.newScore != null && appeal.status === "approved" && (
+                  <span style={{ color: "#15803d", marginLeft: 8 }}>→ 更正为 {appeal.newScore} 分</span>
+                )}
               </p>
               <div className="appeal-detail">
                 <div className="appeal-detail-label">申诉原因</div>
@@ -80,6 +102,21 @@ export default function AppealsPage() {
                 <div className="appeal-detail">
                   <div className="appeal-detail-label">处理意见</div>
                   <p className="response">{appeal.teacherResponse}</p>
+                </div>
+              )}
+              {appeal.status === "pending" && (
+                <div className="appeal-detail">
+                  <div className="appeal-detail-label">更正成绩</div>
+                  <input
+                    className="new-score-input"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    value={newScores[appeal.id] || ""}
+                    onChange={(event) => updateNewScore(appeal.id, event.target.value)}
+                    placeholder="申诉通过后填入更正成绩"
+                  />
                 </div>
               )}
               {appeal.status === "pending" && (

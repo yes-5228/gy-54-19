@@ -392,6 +392,11 @@ blockquote.evidence {
   min-height: 80px;
 }
 
+.new-score-input {
+  margin-top: 4px;
+  max-width: 200px;
+}
+
 .response {
   background: #f8fafc;
   border-radius: 8px;

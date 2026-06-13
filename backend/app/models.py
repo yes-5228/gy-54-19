@@ -71,6 +71,7 @@ class Appeal(db.Model):
     reason = db.Column(db.Text, nullable=False)
     evidence = db.Column(db.Text, default="")
     status = db.Column(db.String(20), default="pending", nullable=False)
+    new_score = db.Column(db.Float, nullable=True)
     teacher_response = db.Column(db.Text, default="")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -88,6 +89,7 @@ class Appeal(db.Model):
             "reason": self.reason,
             "evidence": self.evidence,
             "status": self.status,
+            "newScore": self.new_score,
             "teacherResponse": self.teacher_response,
             "createdAt": self.created_at.isoformat(),
             "updatedAt": self.updated_at.isoformat(),

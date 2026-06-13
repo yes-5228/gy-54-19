@@ -18,8 +18,7 @@ export default function StudentPage() {
   const [myAppeals, setMyAppeals] = useState([]);
 
   const loadMyAppeals = async () => {
-    const allAppeals = await api.listAppeals();
-    setMyAppeals(allAppeals.filter((a) => a.studentNo === studentNo));
+    setMyAppeals(await api.listAppeals(studentNo));
   };
 
   const search = async (event) => {
@@ -141,7 +140,12 @@ export default function StudentPage() {
                         <strong>{appeal.courseName}</strong>
                         <span className={`status ${appeal.status}`}>{statusLabel[appeal.status]}</span>
                       </div>
-                      <p>申诉时成绩：{appeal.score} 分</p>
+                      <p>
+                        申诉时成绩：{appeal.score} 分
+                        {appeal.newScore != null && appeal.status === "approved" && (
+                          <span style={{ color: "#15803d", marginLeft: 8 }}>→ 更正为 {appeal.newScore} 分</span>
+                        )}
+                      </p>
                       <div className="appeal-detail">
                         <div className="appeal-detail-label">申诉原因</div>
                         <blockquote>{appeal.reason}</blockquote>

@@ -29,5 +29,19 @@ def update_appeal(appeal, payload):
         return None, "申诉状态无效"
     appeal.status = status
     appeal.teacher_response = payload.get("teacherResponse", appeal.teacher_response)
+
+    if status == "approved":
+        new_score = payload.get("newScore")
+        if new_score is None:
+            return None, "申诉通过时必须填写更正后的成绩"
+        try:
+            new_score = float(new_score)
+        except (TypeError, ValueError):
+            return None, "更正成绩必须是数字"
+        if new_score < 0 or new_score > 100:
+            return None, "更正成绩必须在 0 到 100 之间"
+        appeal.new_score = new_score
+        appeal.grade.score = new_score
+
     db.session.commit()
     return appeal, None

@@ -9,8 +9,11 @@ appeals_bp = Blueprint("appeals", __name__)
 
 @appeals_bp.get("")
 def index():
-    appeals = Appeal.query.order_by(Appeal.updated_at.desc()).all()
-    return jsonify([appeal.to_dict() for appeal in appeals])
+    query = Appeal.query.order_by(Appeal.updated_at.desc())
+    student_no = request.args.get("studentNo")
+    if student_no:
+        query = query.filter_by(student_no=student_no)
+    return jsonify([appeal.to_dict() for appeal in query.all()])
 
 
 @appeals_bp.post("")

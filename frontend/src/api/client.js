@@ -30,7 +30,8 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   getTranscript: (studentNo) => request(`/students/${studentNo}/transcript`),
-  listAppeals: () => request("/appeals"),
+  listAppeals: (studentNo) =>
+    request(studentNo ? `/appeals?studentNo=${encodeURIComponent(studentNo)}` : "/appeals"),
   createAppeal: (payload) =>
     request("/appeals", {
       method: "POST",
