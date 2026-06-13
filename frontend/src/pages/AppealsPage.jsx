@@ -52,7 +52,16 @@ export default function AppealsPage() {
               <p>
                 {appeal.studentName}（{appeal.studentNo}）当前成绩 {appeal.score} 分
               </p>
-              <blockquote>{appeal.reason}</blockquote>
+              <div className="appeal-detail">
+                <div className="appeal-detail-label">申诉原因</div>
+                <blockquote>{appeal.reason}</blockquote>
+              </div>
+              {appeal.evidence && (
+                <div className="appeal-detail">
+                  <div className="appeal-detail-label">凭证说明</div>
+                  <blockquote className="evidence">{appeal.evidence}</blockquote>
+                </div>
+              )}
               {appeal.teacherResponse && <p className="response">{appeal.teacherResponse}</p>}
             </div>
             <div className="appeal-actions">

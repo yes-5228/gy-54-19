@@ -7,7 +7,7 @@ import Notice from "../components/Notice";
 export default function StudentPage() {
   const [studentNo, setStudentNo] = useState("20240001");
   const [transcript, setTranscript] = useState(null);
-  const [appealForm, setAppealForm] = useState({ gradeId: "", reason: "" });
+  const [appealForm, setAppealForm] = useState({ gradeId: "", reason: "", evidence: "" });
   const [notice, setNotice] = useState(null);
 
   const search = async (event) => {
@@ -26,7 +26,7 @@ export default function StudentPage() {
     try {
       await api.createAppeal({ ...appealForm, gradeId: Number(appealForm.gradeId), studentNo });
       setNotice({ type: "success", message: "申诉已提交" });
-      setAppealForm({ gradeId: "", reason: "" });
+      setAppealForm({ gradeId: "", reason: "", evidence: "" });
       setTranscript(await api.getTranscript(studentNo));
     } catch (error) {
       setNotice({ type: "error", message: error.message });
@@ -100,7 +100,11 @@ export default function StudentPage() {
               </label>
               <label>
                 申诉理由
-                <textarea value={appealForm.reason} onChange={(event) => setAppealForm((current) => ({ ...current, reason: event.target.value }))} required rows="6" />
+                <textarea value={appealForm.reason} onChange={(event) => setAppealForm((current) => ({ ...current, reason: event.target.value }))} required rows="4" placeholder="请简要说明申诉的问题" />
+              </label>
+              <label>
+                凭证说明
+                <textarea value={appealForm.evidence} onChange={(event) => setAppealForm((current) => ({ ...current, evidence: event.target.value }))} rows="5" placeholder="请填写申诉依据，如：对照参考答案、作业照片、考试答卷截图等说明" />
               </label>
               <button className="primary-action" type="submit">
                 <FilePlus2 size={18} />

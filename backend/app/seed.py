@@ -29,6 +29,7 @@ def seed_demo_data():
             grade=grades[2],
             student_no=students[1].student_no,
             reason="期末大题第三题步骤分可能漏算，申请复核。",
+            evidence="已对照参考答案，我的解题步骤与答案一致，但分数明显偏低。附作业照片及参考答案截图作为凭证。",
             status="pending",
         )
     )

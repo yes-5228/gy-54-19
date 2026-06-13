@@ -362,11 +362,29 @@ td span {
   margin: 8px 0;
 }
 
+.appeal-detail {
+  margin-top: 14px;
+}
+
+.appeal-detail-label {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
 blockquote {
   border-left: 3px solid #f4b860;
   color: #0f172a;
-  margin: 12px 0 0;
-  padding-left: 12px;
+  margin: 0;
+  padding: 8px 0 8px 12px;
+  white-space: pre-wrap;
+}
+
+blockquote.evidence {
+  border-left-color: #3b82f6;
+  background: #f0f7ff;
+  border-radius: 0 6px 6px 0;
 }
 
 .response {
