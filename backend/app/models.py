@@ -42,7 +42,7 @@ class Grade(db.Model):
         from .services.gpa import score_to_letter, score_to_point
 
         latest_appeal = sorted(self.appeals, key=lambda appeal: appeal.created_at, reverse=True)
-        return {
+        result = {
             "id": self.id,
             "student": self.student.to_dict(),
             "courseCode": self.course_code,
@@ -57,6 +57,11 @@ class Grade(db.Model):
             "createdAt": self.created_at.isoformat(),
             "updatedAt": self.updated_at.isoformat(),
         }
+        if latest_appeal and latest_appeal[0].teacher_response:
+            result["appealResponse"] = latest_appeal[0].teacher_response
+            result["appealEvidence"] = latest_appeal[0].evidence
+            result["appealReason"] = latest_appeal[0].reason
+        return result
 
 
 class Appeal(db.Model):

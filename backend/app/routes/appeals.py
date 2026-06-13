@@ -16,7 +16,7 @@ def index():
 @appeals_bp.post("")
 def create():
     payload = request.get_json() or {}
-    missing = require_fields(payload, ["gradeId", "studentNo", "reason"])
+    missing = require_fields(payload, ["gradeId", "studentNo", "reason", "evidence"])
     if missing:
         return jsonify({"message": f"缺少字段: {', '.join(missing)}"}), 400
 

@@ -387,6 +387,11 @@ blockquote.evidence {
   border-radius: 0 6px 6px 0;
 }
 
+.teacher-response-input {
+  margin-top: 4px;
+  min-height: 80px;
+}
+
 .response {
   background: #f8fafc;
   border-radius: 8px;

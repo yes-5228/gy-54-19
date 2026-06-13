@@ -12,6 +12,7 @@ const statusLabel = {
 export default function AppealsPage() {
   const [appeals, setAppeals] = useState([]);
   const [notice, setNotice] = useState(null);
+  const [responses, setResponses] = useState({});
 
   const loadAppeals = async () => {
     setAppeals(await api.listAppeals());
@@ -21,11 +22,24 @@ export default function AppealsPage() {
     loadAppeals().catch((error) => setNotice({ type: "error", message: error.message }));
   }, []);
 
+  const updateResponse = (appealId, value) => {
+    setResponses((current) => ({ ...current, [appealId]: value }));
+  };
+
   const decide = async (appeal, status) => {
-    const teacherResponse = status === "approved" ? "已复核，申诉通过。" : "已复核，原成绩无误。";
+    const teacherResponse = responses[appeal.id] || "";
+    if (!teacherResponse.trim()) {
+      setNotice({ type: "error", message: "请填写处理意见" });
+      return;
+    }
     try {
-      await api.updateAppeal(appeal.id, { status, teacherResponse });
+      await api.updateAppeal(appeal.id, { status, teacherResponse: teacherResponse.trim() });
       setNotice({ type: "success", message: "申诉状态已更新" });
+      setResponses((current) => {
+        const next = { ...current };
+        delete next[appeal.id];
+        return next;
+      });
       await loadAppeals();
     } catch (error) {
       setNotice({ type: "error", message: error.message });
@@ -62,7 +76,24 @@ export default function AppealsPage() {
                   <blockquote className="evidence">{appeal.evidence}</blockquote>
                 </div>
               )}
-              {appeal.teacherResponse && <p className="response">{appeal.teacherResponse}</p>}
+              {appeal.teacherResponse && (
+                <div className="appeal-detail">
+                  <div className="appeal-detail-label">处理意见</div>
+                  <p className="response">{appeal.teacherResponse}</p>
+                </div>
+              )}
+              {appeal.status === "pending" && (
+                <div className="appeal-detail">
+                  <div className="appeal-detail-label">填写处理意见</div>
+                  <textarea
+                    className="teacher-response-input"
+                    value={responses[appeal.id] || ""}
+                    onChange={(event) => updateResponse(appeal.id, event.target.value)}
+                    placeholder="请输入具体的处理意见，说明复核结果及原因..."
+                    rows="4"
+                  />
+                </div>
+              )}
             </div>
             <div className="appeal-actions">
               <button disabled={appeal.status !== "pending"} onClick={() => decide(appeal, "approved")} type="button">
