@@ -141,9 +141,16 @@ export default function StudentPage() {
                         <span className={`status ${appeal.status}`}>{statusLabel[appeal.status]}</span>
                       </div>
                       <p>
-                        申诉时成绩：{appeal.score} 分
-                        {appeal.newScore != null && appeal.status === "approved" && (
-                          <span style={{ color: "#15803d", marginLeft: 8 }}>→ 更正为 {appeal.newScore} 分</span>
+                        原成绩：<strong>{appeal.originalScore}</strong> 分
+                        {appeal.status === "approved" && appeal.newScore != null && (
+                          <span style={{ marginLeft: 12 }}>
+                            → 更正后：<strong style={{ color: "#15803d" }}>{appeal.newScore}</strong> 分
+                          </span>
+                        )}
+                        {appeal.status !== "approved" && (
+                          <span style={{ marginLeft: 12, color: "#64748b" }}>
+                            当前成绩：{appeal.currentScore} 分
+                          </span>
                         )}
                       </p>
                       <div className="appeal-detail">

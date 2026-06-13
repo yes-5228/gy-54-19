@@ -17,6 +17,7 @@ def create_appeal(payload):
         student_no=payload["studentNo"],
         reason=payload["reason"],
         evidence=payload.get("evidence", ""),
+        original_score=grade.score,
     )
     db.session.add(appeal)
     db.session.commit()

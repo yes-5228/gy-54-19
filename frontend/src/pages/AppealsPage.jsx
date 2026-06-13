@@ -83,9 +83,17 @@ export default function AppealsPage() {
                 <span className={`status ${appeal.status}`}>{statusLabel[appeal.status]}</span>
               </div>
               <p>
-                {appeal.studentName}（{appeal.studentNo}）当前成绩 {appeal.score} 分
-                {appeal.newScore != null && appeal.status === "approved" && (
-                  <span style={{ color: "#15803d", marginLeft: 8 }}>→ 更正为 {appeal.newScore} 分</span>
+                {appeal.studentName}（{appeal.studentNo}）
+                原成绩：<strong>{appeal.originalScore}</strong> 分
+                {appeal.status === "approved" && appeal.newScore != null && (
+                  <span style={{ marginLeft: 10 }}>
+                    → 已更正：<strong style={{ color: "#15803d" }}>{appeal.newScore}</strong> 分
+                  </span>
+                )}
+                {appeal.status !== "approved" && (
+                  <span style={{ marginLeft: 10, color: "#64748b" }}>
+                    当前成绩：{appeal.currentScore} 分
+                  </span>
                 )}
               </p>
               <div className="appeal-detail">
@@ -106,7 +114,7 @@ export default function AppealsPage() {
               )}
               {appeal.status === "pending" && (
                 <div className="appeal-detail">
-                  <div className="appeal-detail-label">更正成绩</div>
+                  <div className="appeal-detail-label">更正成绩 <span className="muted" style={{ fontSize: 12 }}>（申诉通过时必填）</span></div>
                   <input
                     className="new-score-input"
                     type="number"
@@ -115,7 +123,7 @@ export default function AppealsPage() {
                     step="0.5"
                     value={newScores[appeal.id] || ""}
                     onChange={(event) => updateNewScore(appeal.id, event.target.value)}
-                    placeholder="申诉通过后填入更正成绩"
+                    placeholder="若通过申诉，填写更正后的成绩；驳回可留空"
                   />
                 </div>
               )}
