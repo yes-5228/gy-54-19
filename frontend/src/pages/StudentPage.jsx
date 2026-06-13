@@ -147,11 +147,6 @@ export default function StudentPage() {
                             → 更正后：<strong style={{ color: "#15803d" }}>{appeal.newScore}</strong> 分
                           </span>
                         )}
-                        {appeal.status !== "approved" && (
-                          <span style={{ marginLeft: 12, color: "#64748b" }}>
-                            当前成绩：{appeal.currentScore} 分
-                          </span>
-                        )}
                       </p>
                       <div className="appeal-detail">
                         <div className="appeal-detail-label">申诉原因</div>

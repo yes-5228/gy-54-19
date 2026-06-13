@@ -14,6 +14,7 @@ export default function AppealsPage() {
   const [notice, setNotice] = useState(null);
   const [responses, setResponses] = useState({});
   const [newScores, setNewScores] = useState({});
+  const [approvingId, setApprovingId] = useState(null);
 
   const loadAppeals = async () => {
     setAppeals(await api.listAppeals());
@@ -31,34 +32,51 @@ export default function AppealsPage() {
     setNewScores((current) => ({ ...current, [appealId]: value }));
   };
 
-  const decide = async (appeal, status) => {
+  const startApprove = (appeal) => {
     const teacherResponse = responses[appeal.id] || "";
     if (!teacherResponse.trim()) {
       setNotice({ type: "error", message: "请填写处理意见" });
       return;
     }
-    const payload = { status, teacherResponse: teacherResponse.trim() };
-    if (status === "approved") {
-      const score = newScores[appeal.id];
-      if (!score || isNaN(Number(score))) {
-        setNotice({ type: "error", message: "申诉通过时必须填写更正后的成绩" });
-        return;
-      }
-      payload.newScore = Number(score);
+    setApprovingId(appeal.id);
+  };
+
+  const cancelApprove = () => {
+    setApprovingId(null);
+  };
+
+  const confirmApprove = async (appeal) => {
+    const score = newScores[appeal.id];
+    if (!score || isNaN(Number(score))) {
+      setNotice({ type: "error", message: "请填写更正后的成绩" });
+      return;
     }
     try {
-      await api.updateAppeal(appeal.id, payload);
-      setNotice({ type: "success", message: status === "approved" ? "申诉已通过，成绩已更正" : "申诉已驳回" });
-      setResponses((current) => {
-        const next = { ...current };
-        delete next[appeal.id];
-        return next;
+      await api.updateAppeal(appeal.id, {
+        status: "approved",
+        teacherResponse: (responses[appeal.id] || "").trim(),
+        newScore: Number(score),
       });
-      setNewScores((current) => {
-        const next = { ...current };
-        delete next[appeal.id];
-        return next;
-      });
+      setNotice({ type: "success", message: "申诉已通过，成绩已更正" });
+      setResponses((current) => { const next = { ...current }; delete next[appeal.id]; return next; });
+      setNewScores((current) => { const next = { ...current }; delete next[appeal.id]; return next; });
+      setApprovingId(null);
+      await loadAppeals();
+    } catch (error) {
+      setNotice({ type: "error", message: error.message });
+    }
+  };
+
+  const reject = async (appeal) => {
+    const teacherResponse = responses[appeal.id] || "";
+    if (!teacherResponse.trim()) {
+      setNotice({ type: "error", message: "请填写处理意见" });
+      return;
+    }
+    try {
+      await api.updateAppeal(appeal.id, { status: "rejected", teacherResponse: teacherResponse.trim() });
+      setNotice({ type: "success", message: "申诉已驳回" });
+      setResponses((current) => { const next = { ...current }; delete next[appeal.id]; return next; });
       await loadAppeals();
     } catch (error) {
       setNotice({ type: "error", message: error.message });
@@ -90,11 +108,6 @@ export default function AppealsPage() {
                     → 已更正：<strong style={{ color: "#15803d" }}>{appeal.newScore}</strong> 分
                   </span>
                 )}
-                {appeal.status !== "approved" && (
-                  <span style={{ marginLeft: 10, color: "#64748b" }}>
-                    当前成绩：{appeal.currentScore} 分
-                  </span>
-                )}
               </p>
               <div className="appeal-detail">
                 <div className="appeal-detail-label">申诉原因</div>
@@ -114,21 +127,6 @@ export default function AppealsPage() {
               )}
               {appeal.status === "pending" && (
                 <div className="appeal-detail">
-                  <div className="appeal-detail-label">更正成绩 <span className="muted" style={{ fontSize: 12 }}>（申诉通过时必填）</span></div>
-                  <input
-                    className="new-score-input"
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.5"
-                    value={newScores[appeal.id] || ""}
-                    onChange={(event) => updateNewScore(appeal.id, event.target.value)}
-                    placeholder="若通过申诉，填写更正后的成绩；驳回可留空"
-                  />
-                </div>
-              )}
-              {appeal.status === "pending" && (
-                <div className="appeal-detail">
                   <div className="appeal-detail-label">填写处理意见</div>
                   <textarea
                     className="teacher-response-input"
@@ -139,16 +137,46 @@ export default function AppealsPage() {
                   />
                 </div>
               )}
+              {approvingId === appeal.id && (
+                <div className="appeal-detail">
+                  <div className="appeal-detail-label">更正成绩</div>
+                  <input
+                    className="new-score-input"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    value={newScores[appeal.id] || ""}
+                    onChange={(event) => updateNewScore(appeal.id, event.target.value)}
+                    placeholder="填写更正后的成绩"
+                  />
+                </div>
+              )}
             </div>
             <div className="appeal-actions">
-              <button disabled={appeal.status !== "pending"} onClick={() => decide(appeal, "approved")} type="button">
-                <CheckCircle2 size={18} />
-                通过
-              </button>
-              <button disabled={appeal.status !== "pending"} onClick={() => decide(appeal, "rejected")} type="button">
-                <XCircle size={18} />
-                驳回
-              </button>
+              {appeal.status === "pending" && approvingId !== appeal.id && (
+                <>
+                  <button onClick={() => startApprove(appeal)} type="button">
+                    <CheckCircle2 size={18} />
+                    通过
+                  </button>
+                  <button onClick={() => reject(appeal)} type="button">
+                    <XCircle size={18} />
+                    驳回
+                  </button>
+                </>
+              )}
+              {approvingId === appeal.id && (
+                <>
+                  <button onClick={() => confirmApprove(appeal)} type="button">
+                    <CheckCircle2 size={18} />
+                    确认通过
+                  </button>
+                  <button onClick={cancelApprove} type="button">
+                    取消
+                  </button>
+                </>
+              )}
             </div>
           </article>
         ))}
